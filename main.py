@@ -19,7 +19,7 @@ df = pd.read_sql('''
     AND check_in_date BETWEEN '2020-11-30' AND '2021-01-30'
     ORDER BY guest_name, room_name, check_in_date DESC
     ''', con)
-print(df)
+print(df, end="\n\n")
 
 print("Задание 2")
 df = pd.read_sql('''
@@ -30,7 +30,7 @@ df = pd.read_sql('''
         GROUP BY room_booking.room_id, strftime('%Y', check_in_date)
         ORDER BY room_name, strftime('%Y', check_in_date) DESC
     ''', con)
-print(df.to_string())
+print(df, end="\n\n")
 
 
 
