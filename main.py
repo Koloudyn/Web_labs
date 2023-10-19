@@ -32,6 +32,24 @@ df = pd.read_sql('''
     ''', con)
 print(df, end="\n\n")
 
-
+print("Задание 3")
+df = pd.read_sql('''
+        SELECT room_booking.guest_id, guest_name AS "ФИО", COUNT(room_booking.guest_id) AS "Количество"
+        FROM room_booking, status, guest
+        WHERE room_booking.status_id = status.status_id AND status.status_name = "Занят"
+        AND guest.guest_id = room_booking.guest_id
+        GROUP BY room_booking.guest_id
+        HAVING COUNT (room_booking.guest_id) = (
+            SELECT MAX(count)
+            FROM (
+                SELECT guest_id, COUNT(guest_id) AS count
+                FROM room_booking, status
+                WHERE room_booking.status_id = status.status_id AND status.status_name = "Занят"
+                GROUP BY guest_id
+            )
+        )
+        ORDER BY guest_name;
+    ''', con)
+print(df, end="\n\n")
 
 con.close()
