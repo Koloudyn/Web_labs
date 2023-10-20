@@ -64,7 +64,7 @@ df = pd.read_sql('''
                 FROM guest 
                 WHERE guest_name = "Астахов И.И."
             ) AND check_in_date = '2021-01-13'
-        )
+        );
     ''', con)
 print(df.to_string(), end="\n\n")
 
