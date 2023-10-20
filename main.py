@@ -52,4 +52,20 @@ df = pd.read_sql('''
     ''', con)
 print(df, end="\n\n")
 
+print("Задание 4") #UPDATE service_booking SET price = price * 0.85 WHERE room_booking_id = (
+df = pd.read_sql('''
+        SELECT * , (price * 0.85)
+        FROM service_booking
+        WHERE room_booking_id = (
+            SELECT room_booking_id
+            FROM room_booking
+            WHERE guest_id = (
+                SELECT guest_id 
+                FROM guest 
+                WHERE guest_name = "Астахов И.И."
+            ) AND check_in_date = '2021-01-13'
+        )
+    ''', con)
+print(df.to_string(), end="\n\n")
+
 con.close()
