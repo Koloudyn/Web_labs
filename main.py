@@ -70,8 +70,8 @@ print(df.to_string(), end="\n\n")
 
 print("Задание 5")
 df = pd.read_sql('''
-        SELECT strftime('%m', service_start_date) AS "Месяц", service_start_date AS "Дата", service_name AS "Услуга", 
-        price AS "Сумма", SUM(price) OVER (PARTITION BY service_start_date) AS "Сумма_с_накоплением"
+        SELECT rtrim ( replace(substr ("January--February-March----April----May------June-----July-----August---SeptemberOctober--November-December", strftime ("%m", service_start_date) * 9 - 8, 9), "-", "")) AS "Месяц", 
+        service_start_date AS "Дата", service_name AS "Услуга", price AS "Сумма", SUM(price) OVER (PARTITION BY service_start_date) AS "Сумма_с_накоплением"
         FROM service_booking, service
         WHERE service.service_id = service_booking.service_id
         ORDER BY service_start_date, service_name;
