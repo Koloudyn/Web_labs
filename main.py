@@ -34,7 +34,7 @@ print(df, end="\n\n")
 
 print("Задание 3")
 df = pd.read_sql('''
-        SELECT guest_name AS "ФИО", COUNT(room_booking.guest_id) AS "Количество"
+        SELECT guest_name AS "ФИО",(SELECT COUNT(room_booking.guest_id) AS "Количество"
         FROM room_booking, status, guest, room
         WHERE room_booking.status_id = status.status_id AND status.status_name = "Занят"
         AND guest.guest_id = room_booking.guest_id AND room_booking.room_id = room.room_id
@@ -48,18 +48,14 @@ df = pd.read_sql('''
                 GROUP BY guest_id
             )
         )
-        ORDER BY guest_name;
-    ''', con)
-print(df, end="\n\n")
-df = pd.read_sql('''
-        SELECT guest_name AS "ФИО", type_room_name AS "Типы_номеров"
+        ORDER BY guest_name) AS "Количество", type_room_name AS "Типы_номеров"
         FROM room_booking, status, guest, room, type_room
         WHERE (guest.guest_name = "Астахов И.И." OR guest.guest_name = "Белых К.Д." OR guest.guest_name = "Борисов В.В." OR guest.guest_name = "Садиев С.И.")
         AND guest.guest_id = room_booking.guest_id AND room_booking.room_id = room.room_id AND room.type_room_id = type_room.type_room_id
         AND room_booking.status_id = status.status_id AND status.status_name = "Занят"
         ORDER BY guest_name;
     ''', con)
-print(df, end="\n\n")
+print(df.to_string(), end="\n\n")
 
 print("Задание 4") #UPDATE service_booking SET price = price * 0.85 WHERE room_booking_id = (
 df = pd.read_sql('''
