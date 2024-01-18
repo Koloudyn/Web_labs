@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, \
-    ForeignKey
+    Date, ForeignKey
 from sqlalchemy.orm import relationship
 from database import base
 
@@ -41,7 +41,6 @@ class Client(BaseModel):
 
     game_hour = relationship("GameHour")
 
-
 class Room(BaseModel):
     __tablename__ = 'room'
 
@@ -63,22 +62,18 @@ class Computer(BaseModel):
 
     game_hour = relationship("GameHour")
 
-
 class WorkDay(BaseModel):
     __tablename__ = 'work_day'
 
     admin_id = Column(Integer, ForeignKey('admin.id', ondelete='CASCADE'), nullable=False)
-    day = Column(String, unique=True, nullable=False)
-
-    game_hour = relationship("GameHour")
 
 
 class GameHour(BaseModel):
     __tablename__ = 'game_hour'
 
     client_id = Column(Integer, ForeignKey('client.id', ondelete='CASCADE'), nullable=False)
-    work_day_id = Column(Integer, ForeignKey('work_day.id', ondelete='CASCADE'), nullable=False)
     computer_id = Column(Integer, ForeignKey('computer.id', ondelete='CASCADE'), nullable=False)
     start_hour = Column(Integer, nullable=False)
+    start_date = Column(Date, nullable=False)
 
 
