@@ -133,6 +133,9 @@ def get_computer(id, db: Session = Depends(get_db)):
 
 @app.post("/computer_create")
 def computer_create(computer: create_models.PC, db: Session = Depends(get_db)):
+    if db.query(models.Room).filter(models.Room.id == computer.room_id).first() == None:
+        return JSONResponse(status_code=404, content={"message": "Room is not found"})
+
     computer_model = models.Computer(room_id=computer.room_id, motherboard=computer.motherboard,
                                  cpu=computer.cpu, ram=computer.ram, gpu=computer.gpu,
                                  power_supply=computer.power_supply, drives=computer.drives, case=computer.case)
@@ -156,6 +159,8 @@ def computer_update(id, computer: create_models.PC, db: Session = Depends(get_db
     temp = db.query(models.Computer).filter(models.Computer.id == id).first()
     if temp == None:
         return JSONResponse(status_code=404, content={"message": "Computer is not found"})
+    if db.query(models.Room).filter(models.Room.id == computer.room_id).first() == None:
+        return JSONResponse(status_code=404, content={"message": "Room is not found"})
 
     temp.room_id = computer.room_id
     temp.motherboard = computer.motherboard
@@ -168,6 +173,20 @@ def computer_update(id, computer: create_models.PC, db: Session = Depends(get_db
 
     db.commit()
     return {"message": "Computer update was successful"}
+
+# ------------------WORK DAY-------------------
+@app.put("/work_day/{id}")
+def room_update(id, day: create_models.Work, db: Session = Depends(get_db)):
+    temp = db.query(models.WorkDay).filter(models.WorkDay.id == id).first()
+    if temp == None:
+        return JSONResponse(status_code=404, content={"message": "Work day is not found"})
+    if db.query(models.Admin).filter(models.Admin.id == temp.admin_id).first() == None:
+        return JSONResponse(status_code=404, content={"message": "Admin is not found"})
+
+    temp.admin_id = day.admin_id
+
+    db.commit()
+    return {"message": "Work day update was successful"}
 
 # ------------------GAME HOUR-------------------
 @app.get("/game_hours")
@@ -183,6 +202,13 @@ def get_game_hour(id, db: Session = Depends(get_db)):
 
 @app.post("/game_hour")
 def game_hour_create(game: create_models.HourGame, db: Session = Depends(get_db)):
+    if db.query(models.Client).filter(models.Client.id == game.client_id).first() == None:
+        return JSONResponse(status_code=404, content={"message": "Client is not found"})
+    if db.query(models.Computer).filter(models.Computer.id == game.computer_id).first() == None:
+        return JSONResponse(status_code=404, content={"message": "Computer is not found"})
+    if (game.start_hour > 24) or (game.start_hour < 1):
+        return JSONResponse(status_code=404, content={"message": "Hour can be only 1-24"})
+
     game_model = models.GameHour(client_id=game.client_id, computer_id=game.computer_id,
                                  start_hour=game.start_hour, start_date=game.start_date)
 
@@ -214,7 +240,9 @@ def game_hour_update(id, hour: create_models.HourGame, db: Session = Depends(get
     db.commit()
     return {"message": "Game hour update was successful"}
 
-# ---------------------------------------FUNCTIONS: CLIENT---------------------------------------------------------------
+
+# ---------------------------------------FUNCTIONS: CLIENT--------------------------------------------------------------
+# -------------------------GET------------------------
 @app.get("/client_get_room_and_computer")
 def client_get_room_and_computer(db: Session = Depends(get_db)):
     return db.query(models.Room).all(), db.query(models.Computer).all()
@@ -227,4 +255,24 @@ def client_get_room_and_computer(login, db: Session = Depends(get_db)):
 
 
     return db.query(models.GameHour).filter(models.GameHour.client_id == temp.id).all()
+
+# -------------------------POST-------------------------
+@app.post("/client_add_game_hour/{login}")
+def game_hour_create(login, game: create_models.HourGame, db: Session = Depends(get_db)):
+    if db.query(models.Client).filter(models.Client.login == login).first() == None:
+        return JSONResponse(status_code=404, content={"message": "Client is not found"})
+    if db.query(models.Computer).filter(models.Computer.id == game.computer_id).first() == None:
+        return JSONResponse(status_code=404, content={"message": "Computer is not found"})
+    if (game.start_hour > 24) or (game.start_hour < 1):
+        return JSONResponse(status_code=404, content={"message": "Hour can be only 1-24"})
+    if db.query(models.GameHour).filter(models.GameHour.start_date == game.start_date).first() != None:
+            if db.query(models.GameHour).filter(models.GameHour.start_hour == game.start_hour).first() != None:
+                return JSONResponse(status_code=404, content={"message": "Game hour already exists"})
+
+    game_model = models.GameHour(client_id=game.client_id, computer_id=game.computer_id,
+                                 start_hour=game.start_hour, start_date=game.start_date)
+
+    db.add(game_model)
+    db.commit()
+    return game
 
