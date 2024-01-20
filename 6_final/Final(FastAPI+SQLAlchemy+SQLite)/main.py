@@ -259,8 +259,11 @@ def client_get_room_and_computer(login, db: Session = Depends(get_db)):
 # -------------------------POST-------------------------
 @app.post("/client_add_game_hour/{login}")
 def game_hour_create(login, game: create_models.HourGame, db: Session = Depends(get_db)):
-    if db.query(models.Client).filter(models.Client.login == login).first() == None:
+    temp = db.query(models.Client).filter(models.Client.login == login).first()
+    if temp == None:
         return JSONResponse(status_code=404, content={"message": "Client is not found"})
+    if temp.client_id != game.client_id:
+        return JSONResponse(status_code=404, content={"message": "It's not your id"})
     if db.query(models.Computer).filter(models.Computer.id == game.computer_id).first() == None:
         return JSONResponse(status_code=404, content={"message": "Computer is not found"})
     if (game.start_hour > 24) or (game.start_hour < 1):
